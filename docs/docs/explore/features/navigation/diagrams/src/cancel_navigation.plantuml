@@ -1,0 +1,43 @@
+@startuml
+
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign direction
+
+actor Driver
+participant "3P Nav App" as Nav
+participant Application
+participant "Auto SDK Engine" as SDK  <<engine>>
+participant  Alexa <<avs>>
+
+Driver -> SDK: "Alexa, cancel navigation"
+SDK -> Application : Receive GetNavigationState message
+activate SDK
+Application --> SDK : Publish GetNavigationStateReply message
+SDK -> Alexa : Recognize event with context
+deactivate SDK
+
+
+alt Car is navigating. Nav context contains "state" field set to "NAVIGATING"
+    Alexa->SDK : CancelNavigation directive
+    SDK->Application : Publish CancelNavigation message
+    Application -> Nav : cancel any ongoing navigation
+ 
+    Alexa->Driver : "Cancelling navigation" TTS
+else Car is not navigating. Nav context contains "state" field set to "NOT_NAVIGATING"
+    Alexa->Driver : "Your vehicle is not currently navigating" TTS
+end
+
+@enduml

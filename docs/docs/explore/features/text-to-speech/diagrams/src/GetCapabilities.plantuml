@@ -1,0 +1,33 @@
+@startuml
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign center
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+participant Application 
+participant "Auto SDK Engine" <<engine>>
+participant Alexa <<avs>>
+
+Application->Application: "Get Capabilities"
+
+Application-->"Auto SDK Engine" : Publish GetCapabilities message
+activate "Auto SDK Engine"
+
+"Auto SDK Engine" -> Alexa : GetCapabilities event
+
+"Auto SDK Engine"->Application: Receive GetCapabilitiesReply message
+deactivate "Auto SDK Engine"
+
+@enduml

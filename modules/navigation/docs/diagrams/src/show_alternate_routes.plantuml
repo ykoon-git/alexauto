@@ -1,0 +1,49 @@
+@startuml
+
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign direction
+
+actor Driver
+participant "3P Nav App" as Nav
+participant Application
+participant "Auto SDK Engine" as SDK  <<engine>>
+participant  Alexa <<avs>>
+
+Driver->SDK: "Alexa, show me faster route"
+SDK -> Application : Receive GetNavigationState message
+activate SDK
+Application --> SDK : Publish GetNavigationStateReply message
+SDK -> Alexa : Recognize event with context
+deactivate SDK
+Alexa->SDK : ShowAlternativeRoutes directive
+
+SDK->Application : Publish ShowAlternateRoutes message with **SHORTER_ROUTE** type
+
+Application->Nav : display faster route
+
+alt Success
+    Application<-Nav :  faster route displayed
+	Application->SDK: Publish ShowAlternativeRoutesSucceeded message with alternative route information
+    SDK->Alexa : ShowAlternativeRoutesSuccess event
+    Alexa->Driver : "I found a faster route that will save you 12 mins taking US-101 N and CA-237 E" TTS
+else Error
+    Application<-Nav :  faster route display failed
+    Application -> SDK: Publish NavigationError message with **SHORTER_TIME_ROUTES_FAILED** type & **NOT_SUPPORTED** code
+    SDK->Alexa : ShowAlternativeRoutesFailed event
+   	Alexa->Driver : "Sorry, I could not find a faster route" TTS
+end
+
+@enduml

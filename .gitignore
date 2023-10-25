@@ -1,0 +1,17 @@
+# XDG cache folder where clangd index resides
+.cache
+# gradle external native build
+.cxx
+.DS_Store
+/*native-dependencies
+/.idea
+/.repo
+/.vscode
+/build
+# CLion build folder
+/cmake-build-*
+/extensions/*/**
+compile_commands.json
+tools/builder
+__pycache__
+aacs/

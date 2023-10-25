@@ -1,0 +1,47 @@
+@startuml
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign center
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+actor User Order 10
+participant Application  order 20
+participant "Auto SDK Engine"  as AutoSDK  <<engine>> order 30
+participant "Alexa" as Alexa <<avs>> order 40
+
+note right of User
+connects phone to car
+head unit and
+grants access to upload
+end note
+
+User -> Application
+Application -> AutoSDK: Publish AddAddressBook message
+activate AutoSDK
+AutoSDK -> Alexa: uploads contacts
+AutoSDK -> Application: Receive AddAddressBookReply message
+deactivate AutoSDK
+...
+
+note right of User
+"call bob"
+end note
+
+User -> Alexa
+
+Alexa -> AutoSDK: dial directive
+
+AutoSDK -> Application: Receive Dial message with Bob's details
+
+@enduml

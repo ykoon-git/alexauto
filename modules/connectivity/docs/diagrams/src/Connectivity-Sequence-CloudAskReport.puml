@@ -1,0 +1,37 @@
+@startuml
+
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign direction
+
+participant Application  order 10
+participant "Auto SDK Engine" as AutoSDK <<engine>> order 20
+participant "Alexa" as Alexa <<avs>> order 30
+
+Alexa -> AutoSDK : ReportState directive
+activate AutoSDK
+
+Application -> AutoSDK : Publish ConnectivityStateChange message
+
+AutoSDK -> Application : Receive GetConnectivityState message
+activate AutoSDK
+Application --> AutoSDK : Publish GetConnectivityStateReply message
+AutoSDK -> Alexa : report current connectivity state to Alexa
+deactivate AutoSDK
+
+AutoSDK -> Application : Receive ConnectivityStateChangeReply message
+deactivate AutoSDK
+
+@enduml

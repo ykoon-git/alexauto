@@ -1,0 +1,49 @@
+@startuml
+
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign direction
+
+actor Driver
+participant "3P Nav App" as Nav
+participant Application
+participant "Auto SDK Engine" as SDK  <<engine>>
+participant  Alexa <<avs>>
+
+Driver->SDK: "Alexa, What is the speed limit here"
+SDK -> Application : Receive GetNavigationState message
+activate SDK
+Application --> SDK : Publish GetNavigationStateReply message
+SDK -> Alexa : Recognize event with context
+deactivate SDK
+
+Alexa->SDK : AnnounceRoadRegulation directive
+
+SDK->Application : Publish AnnounceRoadRegulation message with **SPEED_LIMIT** request
+Application->Nav : announce road regulation
+
+alt Success
+	Nav->Nav : "Speed limit is 45 mph" TTS by navigation system
+    Application<-Nav : road regulation announced
+    Application -> SDK: Publish NavigationEvent message with **SPEED_LIMIT_REGULATION_ANNOUNCED** event
+    SDK->Alexa : AnnounceRoadRegulationSuccess event
+else Error
+	Nav->Nav : "Cannot get the speed limit" TTS by navigation system
+    Application<-Nav : road regulation announcement failed
+    Application -> SDK: Publish NavigationError message with **SPEED_LIMIT_REGULATION_FAILED** type & **INTERNAL_SERVICE_ERROR** code
+    SDK->Alexa : AnnounceRoadRegulationFailed event
+end
+
+@enduml

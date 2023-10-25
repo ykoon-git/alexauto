@@ -1,0 +1,27 @@
+From 71a726f8785ba54204a37729669a4cd3eeec5f98 Mon Sep 17 00:00:00 2001
+From: Raghavendra Bilamkar <bilamkar@amazon.com>
+Date: Tue, 17 May 2022 09:10:34 -0700
+Subject: [PATCH 10/14] Send directive handling completed when in Idle
+
+---
+ .../AlexaPresentation/src/AlexaPresentation.cpp               | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/modules/Alexa/SmartScreenCapabilityAgents/AlexaPresentation/src/AlexaPresentation.cpp b/modules/Alexa/SmartScreenCapabilityAgents/AlexaPresentation/src/AlexaPresentation.cpp
+index a032984..3c3ea54 100644
+--- a/modules/Alexa/SmartScreenCapabilityAgents/AlexaPresentation/src/AlexaPresentation.cpp
++++ b/modules/Alexa/SmartScreenCapabilityAgents/AlexaPresentation/src/AlexaPresentation.cpp
+@@ -1211,6 +1211,10 @@ void AlexaPresentation::executeExecuteCommandEvent(
+ 
+     switch (m_state) {
+         case smartScreenSDKInterfaces::State::IDLE:
++            ACSDK_INFO(LX("executeExecuteCommandEvent")
++                        .m("Received in IDLE state, sending successs to unblock directive handling"));
++            setHandlingCompleted(info);
++            break;
+         case smartScreenSDKInterfaces::State::ACQUIRING:
+             // Do Nothing.
+             break;
+-- 
+2.36.0
+

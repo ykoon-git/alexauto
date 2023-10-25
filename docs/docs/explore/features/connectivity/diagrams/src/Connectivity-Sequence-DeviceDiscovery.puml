@@ -1,0 +1,29 @@
+@startuml
+
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign direction
+
+participant Application  order 10
+participant "Auto SDK Engine" as AutoSDK <<engine>> order 20
+participant "Alexa" as Alexa <<avs>> order 30
+
+AutoSDK -> Application : Receive GetIdentifier message
+activate AutoSDK
+Application --> AutoSDK : Publish GetIdentifierReply message
+AutoSDK -> Alexa : report network identifier to Alexa
+deactivate AutoSDK
+
+@enduml

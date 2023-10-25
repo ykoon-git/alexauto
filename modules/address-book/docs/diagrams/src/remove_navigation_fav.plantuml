@@ -1,0 +1,37 @@
+@startuml
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign center
+skinparam useBetaStyle true
+
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+actor User Order 10
+participant Application  order 30
+participant "Auto SDK Engine"  as AutoSDK  <<engine>> order 40
+participant "Alexa" as Alexa <<avs>> order 50
+
+note right of User
+    revokes access to
+    navigation favorites
+end note
+
+User ->  Application
+Application -> AutoSDK: Publish RemoveAddressBook message
+activate AutoSDK
+AutoSDK -> Alexa: removes navigation favorites from Alexa
+AutoSDK ->  Application: Receive RemoveAddressBookReply message
+deactivate AutoSDK
+
+@enduml

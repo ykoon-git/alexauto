@@ -1,0 +1,1 @@
+See the [Loopback Detector module documentation](./docs/index.md).

@@ -1,0 +1,49 @@
+@startuml
+
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign direction
+
+actor Driver
+participant "3P Nav App" as Nav
+participant Application
+participant "Auto SDK Engine" as SDK  <<engine>>
+participant  Alexa <<avs>>
+
+Driver -> SDK: "Which exit should I take for the airport"
+SDK -> Application : Receive GetNavigationState message
+activate SDK
+Application --> SDK : Publish GetNavigationStateReply message
+SDK -> Alexa : Recognize event with context
+deactivate SDK
+
+Alexa -> SDK : AnnounceManeuver directive
+
+SDK -> Application : Publish AnnounceManeuver message
+Application -> Nav : announce the maneuver
+alt Success
+	Nav -> Nav : "You need to take exit 45 Airport Ave for San Jose airport" TTS by navigation system
+    Application <- Nav : maneuver announced
+    Application -> SDK: Publish NavigationEvent message with **EXIT_GUIDANCE_ANNOUNCED** event
+    SDK -> Alexa : AnnounceManeuverSuccess event
+else Error	
+
+	Nav -> Nav : "Cannot find your next exit" TTS by navigation system
+    Application <- Nav : maneuver announcement failed
+    Application -> SDK: Publish NavigationError message with **EXIT_GUIDANCE_FAILED** type & **ROUTE_NOT_FOUND** code
+    SDK->Alexa : AnnounceManeuverFailed event
+end
+
+@enduml

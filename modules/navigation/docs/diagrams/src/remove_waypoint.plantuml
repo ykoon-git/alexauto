@@ -1,0 +1,76 @@
+@startuml
+
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign direction
+
+actor Driver
+participant "3P Nav App" as Nav
+participant Application
+participant "Auto SDK Engine" as SDK  <<engine>>
+participant  Alexa <<avs>>
+
+== Adding a waypoint ==
+
+Driver->SDK: "Add Starbucks to the route"
+SDK -> Application : Receive GetNavigationState message
+activate SDK
+Application --> SDK : Publish GetNavigationStateReply message
+SDK -> Alexa : Recognize event with context
+deactivate SDK
+
+Alexa->SDK : StartNavigation directive with updated waypoints
+
+SDK->Application : Publish StartNavigation message with payload containing updated waypoints
+
+Application->Nav : Update the route with thewaypoints\n and start/continue navigation
+Application<-Nav : navigation started
+Application->SDK: Publish NavigationEvent message with **NAVIGATION_STARTED** event
+SDK -> Application : Receive GetNavigationState message
+activate SDK
+Application --> SDK : Publish GetNavigationStateReply message
+SDK->Alexa : StartNavigationSuccess event
+deactivate SDK
+Alexa->Driver : "Adding Starbucks to the route" TTS
+
+== Removing a waypoint ==
+
+Driver->SDK: "Remove Starbucks from the route"
+SDK -> Application : Receive GetNavigationState message
+activate SDK
+Application --> SDK : Publish GetNavigationStateReply message
+SDK -> Alexa : Recognize event with context
+deactivate SDK
+Alexa->SDK : StartNavigation directive with updated waypoints
+SDK->Application : Publish StartNavigation message with payload containing updated waypoints
+Application->Nav : Update the route with the waypoints\n and start/continue navigation
+
+alt Success
+	Application<-Nav : navigation started
+    Application->SDK: Publish NavigationEvent message with **NAVIGATION_STARTED** event
+    SDK -> Application : Receive GetNavigationState message
+    activate SDK
+    Application --> SDK : Publish GetNavigationStateReply message
+    SDK->Alexa : StartNavigationSuccess event
+    deactivate SDK
+    Alexa->Driver : "Removing Starbucks from the route" TTS
+else Error
+	Application<-Nav : navigation failed
+    Application->SDK: Publish NavigationError message with **NAVIGATION_START_FAILED** type & **INTERNAL_SERVICE_ERROR** code
+    SDK->Alexa : StartNavigationError event
+    Alexa->Driver : "Sorry, cannot remove Starbucks from your route" TTS OR other error response
+end
+
+@enduml

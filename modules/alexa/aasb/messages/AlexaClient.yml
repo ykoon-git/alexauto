@@ -1,0 +1,153 @@
+topic: AlexaClient
+namespace: aasb.message.alexa.alexaClient
+path: Alexa/AlexaClient
+
+messages:
+  - action: ConnectionStatusChanged
+    direction: outgoing
+    desc: Notifies the platform implementation of an AVS connection status change.
+    payload:
+      - name: status
+        type: ConnectionStatus
+        desc: The new AVS connection status.
+      - name: reason
+        type: ConnectionChangedReason
+        desc: The reason for the status change.
+
+  - action: ConnectionStatusChanged
+    direction: outgoing
+    desc: Notifies a listener about changes in connection status for multiple Alexa endpoints. There are multiple connections when using Local Voice Control.
+    name: ConnectionStatusChangedDetailed
+    payload:
+      - name: status
+        type: ConnectionStatus
+        desc: The Alexa connection status. This is an aggregated status for the multiple connections.
+      - name: reason
+        type: ConnectionChangedReason
+        desc: The reason for the status change.
+      - name: detailed
+        type: ConnectionStatusDetails
+        desc: A detailed breakdown of connection status info per connection type.
+
+  - action: DialogStateChanged
+    direction: outgoing
+    desc: Notifies the platform implementation of a dialog state change.
+    payload:
+      - name: state
+        type: DialogState
+        desc: The new dialog state.
+      - name: assistantId
+        type: int
+        desc: The ID of the assistant that the dialog state change is associated with. The assistantId is 2 for Alexa dialog state changes; For applications using multiple assistants, the value will be an integer greater than 2, corresponding to the assistant ID in Engine configuration field "aace.coassistant.assistants[i].id" for each additional assistant.        
+        example: 2
+
+  - action: AuthStateChanged
+    direction: outgoing
+    desc: Notifies the platform implementation of an AVS authorization state change.
+    payload:
+      - name: state
+        type: AuthState
+        desc: The new authorization state.
+      - name: error
+        type: AuthError
+        desc: The error state of the authorization attempt.
+
+  - action: StopForegroundActivity
+    direction: incoming
+    desc: Notifies the Engine to stop foreground activity.
+
+types:
+  - name: AuthState
+    type: alias
+    alias: aasb.message.alexa.authProvider.AuthState
+
+  - name: AuthError
+    type: alias
+    alias: aasb.message.alexa.authProvider.AuthError
+
+  - name: DialogState
+    type: enum
+    values:
+      - name: IDLE
+        desc: Alexa is idle and ready for an interaction.
+      - name: LISTENING
+        desc: Alexa is currently listening.
+      - name: EXPECTING
+        desc: Alexa is currently expecting a response from the user.
+      - name: THINKING
+        desc: A user request has completed, and no more user input is being accepted. Alexa is waiting for a response from AVS.
+      - name: SPEAKING
+        desc: Alexa is responding to a request with speech.
+      - name: FINISHED
+        desc: Alexa has finished processing a single Speak directive. If the Speak directive is part of a speech burst, the state will transition back to SPEAKING; if the Speak directive was the last in the burst, the state will transition back to IDLE.
+
+  - name: ConnectionStatus
+    type: enum
+    values:
+      - name: DISCONNECTED
+        desc: Not connected to AVS.
+      - name: PENDING
+        desc: Attempting to establish a connection to AVS.
+      - name: CONNECTED
+        desc: Connected to AVS.
+
+  - name: ConnectionChangedReason
+    type: enum
+    values:
+      - name: NONE
+        desc: No reason specified.
+      - name: SUCCESS
+        desc: The connection status changed due to a successful operation.
+      - name: UNRECOVERABLE_ERROR
+        desc: The connection status changed due to an error from which there is no recovery.
+      - name: ACL_CLIENT_REQUEST
+        desc: The connection status changed due to a client request.
+      - name: ACL_DISABLED
+        desc: The connection attempt failed because connection was disabled.
+      - name: DNS_TIMEDOUT
+        desc: The connection attempt failed due to a DNS resolution timeout.
+      - name: CONNECTION_TIMEDOUT
+        desc: The connection attempt failed due to a connection timeout.
+      - name: CONNECTION_THROTTLED
+        desc: The connection attempt failed due to excessive load on the server.
+      - name: INVALID_AUTH
+        desc: The provided access credentials were invalid.
+      - name: PING_TIMEDOUT
+        desc: There was a timeout sending a ping request.
+      - name: WRITE_TIMEDOUT
+        desc: There was a timeout writing to AVS.
+      - name: READ_TIMEDOUT
+        desc: There was a timeout reading from AVS.
+      - name: FAILURE_PROTOCOL_ERROR
+        desc: There was an underlying protocol error.
+      - name: INTERNAL_ERROR
+        desc: There was an internal error.
+      - name: SERVER_INTERNAL_ERROR
+        desc: There was an internal error on the server.
+      - name: SERVER_SIDE_DISCONNECT
+        desc: The server asked the client to reconnect.
+      - name: SERVER_ENDPOINT_CHANGED
+        desc: The server endpoint has changed.
+
+  - name: ConnectionStatusInfo
+    type: struct
+    values:
+      - name: status
+        type: ConnectionStatus
+        desc: The connection status.
+        default: ConnectionStatus::DISCONNECTED
+      - name: reason
+        type: ConnectionChangedReason
+        desc: The reason for the connection status change.
+        default: ConnectionChangedReason::NONE
+
+  - name: ConnectionStatusDetails
+    type: struct
+    values: 
+      - name: avs
+        type: ConnectionStatusInfo
+        desc: Describes the connection to the Alexa Voice Service.
+      - name: local
+        type: ConnectionStatusInfo
+        desc: Describes the connection to the local endpoint.
+        

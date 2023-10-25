@@ -1,0 +1,35 @@
+@startuml
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign center
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+participant Application 
+participant "Auto SDK Engine" <<engine>>
+participant Alexa <<avs>>
+
+Application->Application: "Synthesize Alexa speech - Hello"
+
+Application-->"Auto SDK Engine" : Publish PrepareSpeech message
+
+"Auto SDK Engine" -> Alexa : PrepareSpeech event
+
+alt Success
+    "Auto SDK Engine"->Application: Receive PrepareSpeechCompleted message
+else Fail
+    "Auto SDK Engine"->Application: Receive PrepareSpeechFailed message
+end
+
+@enduml

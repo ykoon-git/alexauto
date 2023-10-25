@@ -1,0 +1,49 @@
+@startuml
+
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign direction
+
+actor Driver
+participant "3P Nav App" as Nav
+participant Application
+participant "Auto SDK Engine" as SDK  <<engine>>
+participant  Alexa <<avs>>
+
+Driver->SDK: "Alexa, zoom in on the map"
+SDK -> Application : Receive GetNavigationState message
+activate SDK
+Application --> SDK : Publish GetNavigationStateReply message
+SDK -> Alexa : Recognize event with context
+deactivate SDK
+
+
+Alexa->SDK : ControlDisplay directive
+
+SDK->Application : Publish ControlDisplay message with **ZOOM_IN** request
+
+Application->Nav : zoom into map
+
+alt Success
+	Application<-Nav : zoom into map success
+	Application -> SDK: Publish NavigationEvent message with **ZOOMED_IN** event
+    SDK->Alexa : ControlDisplaySuccess event
+else Error
+	Application<-Nav : zoom into map failed
+    Application -> SDK: Publish NavigationError message with **ZOOMED_IN_FAILED** type & **NOT_ALLOWED** code
+    SDK->Alexa : ControlDisplaySuccessFailed event
+end
+
+@enduml

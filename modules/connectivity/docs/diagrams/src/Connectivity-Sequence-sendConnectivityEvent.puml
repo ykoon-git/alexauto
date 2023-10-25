@@ -1,0 +1,50 @@
+@startuml
+
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign direction
+
+actor User order 10
+participant Application  order 30
+participant "Auto SDK Engine" as AutoSDK <<engine>> order 40
+participant "Alexa" as Alexa <<avs>> order 50
+
+alt "Activating Trial" 
+	note right of User
+    clicks `Activate Trial` button
+    on screen to activate
+    trial up-sell.
+    end note
+    Application -> AutoSDK : Publish SendConnectivityEvent message specifying **ACTIVATE_TRIAL** event
+	activate AutoSDK
+else "Activating Paid Plan"
+	note right of User
+    clicks `Activate Paid Plan` button
+    on screen to activate
+    paid plan up-sell.
+    end note
+    Application -> AutoSDK : Publish SendConnectivityEvent message specifying **ACTIVATE_PAID_PLAN** event
+end
+
+AutoSDK -> Alexa : InitiateDataPlanSubscription event
+
+alt "Successful in sending event to Alexa" 
+	AutoSDK -> Application : Receive SendConnectivityEventReply message with **SUCCESS** status
+else "on failure"
+	AutoSDK -> Application : Receive SendConnectivityEventReply message with **FAIL** status
+	deactivate AutoSDK
+end
+
+@enduml

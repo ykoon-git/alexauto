@@ -1,0 +1,49 @@
+@startuml
+
+<style>
+sequenceDiagram {
+    .engine {
+        BackgroundColor LightSkyBlue
+        BorderColor CornflowerBlue
+    }
+    .avs {
+        BackgroundColor TECHNOLOGY
+        BorderColor Green
+    }
+}
+</style>
+
+skinparam roundcorner 10
+skinparam sequenceMessageAlign direction
+
+actor Driver
+participant "3P Nav App" as Nav
+participant Application
+participant "Auto SDK Engine" as SDK  <<engine>>
+participant  Alexa <<avs>>
+
+Driver->SDK: "Show my recent trips"
+SDK->Application : Receive GetNavigationState message
+activate SDK
+Application --> SDK : Publish GetNavigationStateReply message
+SDK -> Alexa : Recognize event with context
+deactivate SDK
+
+Alexa->SDK : ShowPreviousWaypoints directive
+
+SDK->Application : Publish ShowPreviousWaypoints message
+Application->Nav : show driver's previous waypoints
+
+alt Success
+	Application<-Nav : previous waypoints shown
+    Application->SDK: Publish NavigationEvent message with **PREVIOUS_WAYPOINTS_SHOWN** event
+    SDK->Alexa : ShowPreviousWaypointsSuccess event
+    Alexa->Driver : "OK, here is what I found in your recent trips" TTS
+else Error
+	Application<-Nav : no previous waypoints
+    Application->SDK: Publish NavigationError message with **NAVIGATION_START_FAILED** type & **NO_PREVIOUS_WAYPOINTS** code
+    SDK->Alexa : ShowPreviousWaypointsError event
+    Alexa->Driver : "Sorry, I could not find anything in your recent trips" TTS
+end
+
+@enduml
